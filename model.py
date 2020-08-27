@@ -14,7 +14,7 @@ class Model ():
         deconv_1 = keras.layers.Conv2DTranspose(64, 3, strides=3, activation=keras.activations.selu, padding="valid")(conv_3)
         deconv_2 = keras.layers.Conv2DTranspose(64, 5, strides=3, activation=keras.activations.selu, padding="valid")(deconv_1)
         deconv_3 = keras.layers.Conv2DTranspose(64, 7, strides=3, activation=keras.activations.selu, padding="valid")(deconv_2)
-        output = keras.layers.Conv2DTranspose(1, 11, strides=1, activation=keras.activations.tanh, padding="valid")(deconv_3)
+        output = keras.layers.Conv2DTranspose(1, 11, strides=1, activation=keras.activations.sigmoid, padding="valid")(deconv_3)
 
         model = keras.Model(inputs=input, outputs=output)
 
