@@ -20,13 +20,18 @@ for i in range(100):
 
     rrpl, arial = data.getCharPairs(batch_size)
 
-    fake_A = pix2pix.generator.predict(arial)
+    fake_A = pix2pix.generator.predict(rrpl)
 
     d_loss_real = pix2pix.discriminator.train_on_batch([rrpl, arial], valid)
     d_loss_fake = pix2pix.discriminator.train_on_batch([fake_A, arial], fake)
     d_loss = 0.5 * np.add(d_loss_real, d_loss_fake)
 
     g_loss = pix2pix.combined.train_on_batch([rrpl, arial], [valid, rrpl])
+
+    rrpl, arial = data.getCharPair("正")
+    predicted = pix2pix.generator.predict(np.expand_dims(rrpl, 0))
+
+    data.drawOutput(predicted[0]).save("output.png")
 
     print(d_loss)
     print(g_loss)
