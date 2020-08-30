@@ -2,8 +2,6 @@ import os
 import numpy as np
 import tensorflow as tf
 
-tf.test.is_gpu_available()
-
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 from model import Model
@@ -16,7 +14,7 @@ for i in range(10000):
 
     print("Running iteration {}".format(i + 1))
 
-    input, output = data.getCharPairs(50)
+    input, output = data.getCharPairs(10)
     model.fit(x=input, y=output)
 
     # Test model

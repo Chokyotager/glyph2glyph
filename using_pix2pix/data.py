@@ -70,7 +70,7 @@ class Data ():
             input.append(rrpl)
             output.append(arial)
 
-        return input, output
+        return np.array(input), np.array(output)
 
     def drawOutput (self, array):
 
