@@ -24,14 +24,15 @@ class Pix2Pix ():
         patch = int(self.image_rows / 2**4)
         #self.disc_patch = (patch, patch, 1)
 
-        discrim_optimizer = keras.optimizers.Adam(lr=1e-4, beta_1=0.5)
-        gen_optimizer = keras.optimizers.Adam(lr=2e-4, beta_1=0.5)
+        discrim_optimizer = keras.optimizers.Adam(learning_rate=2e-6, beta_1=0.5, beta_2=0.999)
+        gen_optimizer = keras.optimizers.Adam(learning_rate=2e-4, beta_1=0.5, beta_2=0.999)
 
-        loss = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+        discrim_loss = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+        gen_loss = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
         # Build and compile the discriminator
         self.discriminator = self.buildDiscriminator()
-        self.discriminator.compile(loss=loss,
+        self.discriminator.compile(loss=discrim_loss,
             loss_weights=0.5,
             optimizer=discrim_optimizer,
             metrics=["accuracy"])
@@ -49,32 +50,32 @@ class Pix2Pix ():
         img_B = keras.layers.Input(shape=self.image_shape)
 
         # By conditioning on B generate a fake version of A
-        fake_A = self.generator(img_B)
+        fake_B = self.generator(img_A)
 
         # For the combined model we will only train the generator
         self.discriminator.trainable = False
 
         # Discriminators determines validity of translated images / condition pairs
-        valid = self.discriminator([fake_A, img_B])
+        valid = self.discriminator([img_A, fake_B])
 
-        self.combined = keras.Model(inputs=[img_A, img_B], outputs=[valid, fake_A])
-        self.combined.compile(loss=loss,
-                              loss_weights=1,
+        self.combined = keras.Model(inputs=[img_A, img_B], outputs=[valid, fake_B])
+        self.combined.compile(loss=[gen_loss, "MAE"],
+                              loss_weights=[1, 10],
                               optimizer=gen_optimizer)
 
     def buildGenerator (self):
 
         def conv2d (layer_input, filters, f_size=3, bn=True):
-            d = keras.layers.Conv2D(filters, kernel_size=f_size, strides=2, padding="same", activation="selu")(layer_input)
-            #d = keras.layers.LeakyReLU(alpha=0.2)(d)
+            d = keras.layers.Conv2D(filters, kernel_size=f_size, strides=2, padding="same")(layer_input)
+            d = keras.layers.LeakyReLU(alpha=0.2)(d)
             if bn:
                 d = keras.layers.BatchNormalization()(d)
             return d
 
         def deconv2d(layer_input, skip_input, filters, f_size=4, dropout_rate=0):
             u = keras.layers.UpSampling2D(size=2)(layer_input)
-            u = keras.layers.Conv2D(filters, kernel_size=f_size, strides=1, padding="same", activation="selu")(u)
-            #u = keras.layers.LeakyReLU(alpha=0.2)(u)
+            u = keras.layers.Conv2D(filters, kernel_size=f_size, strides=1, padding="same")(u)
+            u = keras.layers.LeakyReLU(alpha=0.2)(u)
             if dropout_rate:
                 u = keras.layers.Dropout(dropout_rate)(u)
             u = keras.layers.BatchNormalization()(u)
