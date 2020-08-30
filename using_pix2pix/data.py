@@ -55,7 +55,7 @@ class Data ():
         rrpl = self.drawChar(char, font="font/RRPL.ttf")
         arial = self.drawChar(char, font="font/arial_unicode.ttf")
 
-        return rrpl, arial
+        return rrpl/127.5 - 1, arial/127.5 - 1
 
     def getCharPairs (self, batch=100):
 
@@ -70,9 +70,9 @@ class Data ():
             input.append(rrpl)
             output.append(arial)
 
-        return np.array(input), np.array(output)
+        return input, output
 
     def drawOutput (self, array):
 
-        array = np.uint8(np.squeeze(array, 2))
+        array = np.uint8(510 * np.squeeze(array, 2) + 127.5)
         return Image.fromarray(array, "L")
