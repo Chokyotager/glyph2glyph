@@ -74,5 +74,5 @@ class Data ():
 
     def drawOutput (self, array):
 
-        array = np.uint8(510 * np.squeeze(array, 2) + 127.5)
+        array = np.uint8(127.5 * np.squeeze(array, 2) + 127.5)
         return Image.fromarray(array, "L")

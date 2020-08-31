@@ -4,6 +4,7 @@ import numpy as np
 data = Data()
 rrpl, arial = data.getCharPair("正")
 
-result = arial.min()
+result = arial.max()
 
-print(rrpl.shape)
+print(result)
+data.drawOutput(rrpl).save("output.png")

@@ -15,12 +15,14 @@ accuracy = 0
 ignore_runs = 0
 
 # Train the model
-for i in range(10000):
+for i in range(100000):
 
     rrpl, arial = data.getCharPair("龍")
     predicted = pix2pix.generator.predict(np.expand_dims(rrpl, 0))
 
-    data.drawOutput(predicted[0]).save("output.png")
+    print(predicted[0])
+
+    data.drawOutput(rrpl).save("output.png")
 
     # Adversarial loss ground truths
     valid = np.ones((batch_size,))
@@ -34,17 +36,21 @@ for i in range(10000):
 
     if ignore_runs <= 0:
 
-        combined_A = np.concatenate([rrpl, arial])
-        combined_B = np.concatenate([rrpl, fake_B])
+        combined_A = np.concatenate([rrpl, rrpl])
+        combined_B = np.concatenate([arial, fake_B])
         combined_result = np.concatenate([valid, fake])
 
         d_loss = pix2pix.discriminator.train_on_batch([combined_A, combined_B], combined_result)
 
-    g_loss = pix2pix.combined.train_on_batch([rrpl, arial], [valid, arial])
+    g_loss = pix2pix.combined.train_on_batch([rrpl, arial], [valid])
     ignore_runs -= 1
 
     accuracy = d_loss[1]
 
     print("[Iteration {}] [D loss: {}, acc: {}] [G loss: {}]".format(i,
             d_loss[0], accuracy,
-            g_loss[0]))
+            g_loss))
+
+    if i % 100 == 0:
+        print("SAVING...")
+        pix2pix.generator.save("saves/save.h5")
