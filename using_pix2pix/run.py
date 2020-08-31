@@ -20,9 +20,7 @@ for i in range(100000):
     rrpl, arial = data.getCharPair("龍")
     predicted = pix2pix.generator.predict(np.expand_dims(rrpl, 0))
 
-    print(predicted[0])
-
-    data.drawOutput(rrpl).save("output.png")
+    data.drawOutput(predicted[0]).save("output.png")
 
     # Adversarial loss ground truths
     valid = np.ones((batch_size,))
