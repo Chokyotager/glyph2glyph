@@ -17,10 +17,12 @@ ignore_runs = 0
 # Train the model
 for i in range(100000):
 
-    rrpl, arial = data.getCharPair("龍")
-    predicted = pix2pix.generator.predict(np.expand_dims(rrpl, 0))
+    if i % 3 == 0:
 
-    data.drawOutput(predicted[0]).save("output.png")
+        rrpl, arial = data.getCharPair("龍")
+        predicted = pix2pix.generator.predict(np.expand_dims(rrpl, 0))
+
+        data.drawOutput(predicted[0]).save("output.png")
 
     # Adversarial loss ground truths
     valid = np.ones((batch_size,))

@@ -15,8 +15,8 @@ class Pix2Pix ():
         self.channels = 1
 
         # Number of filters in the first layer of G and D
-        self.gf = 8
-        self.df = 8
+        self.gf = 64
+        self.df = 64
 
         self.gbn = True
         self.dbn = True
@@ -27,7 +27,7 @@ class Pix2Pix ():
         patch = int(self.image_rows / 2**4)
         #self.disc_patch = (patch, patch, 1)
 
-        discrim_optimizer = keras.optimizers.Adam(learning_rate=8e-6, beta_1=0.5, beta_2=0.999)
+        discrim_optimizer = keras.optimizers.Adam(learning_rate=5e-6, beta_1=0.5, beta_2=0.999)
         gen_optimizer = keras.optimizers.Adam(learning_rate=2e-4, beta_1=0.6, beta_2=0.999)
 
         discrim_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
