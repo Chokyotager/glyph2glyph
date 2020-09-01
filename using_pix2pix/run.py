@@ -40,14 +40,14 @@ for i in range(100000):
 
         d_loss = pix2pix.discriminator.train_on_batch([combined_A, combined_B], combined_result)
 
-    g_loss = pix2pix.combined.train_on_batch([rrpl, arial], [valid])
+    g_loss = pix2pix.combined.train_on_batch([rrpl, arial], [valid, arial])
     ignore_runs -= 1
 
     accuracy = d_loss[1]
 
     print("[Iteration {}] [D loss: {}, acc: {}] [G loss: {}]".format(i,
             d_loss[0], accuracy,
-            g_loss))
+            g_loss[0]))
 
     if i % 100 == 0:
         print("SAVING...")

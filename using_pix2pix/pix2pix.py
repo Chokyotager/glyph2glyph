@@ -15,11 +15,11 @@ class Pix2Pix ():
         self.channels = 1
 
         # Number of filters in the first layer of G and D
-        self.gf = 12
-        self.df = 12
+        self.gf = 8
+        self.df = 8
 
         self.gbn = True
-        self.dbn = False
+        self.dbn = True
 
         self.image_shape = (self.image_rows, self.image_columns, self.channels)
 
@@ -27,7 +27,7 @@ class Pix2Pix ():
         patch = int(self.image_rows / 2**4)
         #self.disc_patch = (patch, patch, 1)
 
-        discrim_optimizer = keras.optimizers.Adam(learning_rate=2e-5, beta_1=0.5, beta_2=0.999)
+        discrim_optimizer = keras.optimizers.Adam(learning_rate=8e-6, beta_1=0.5, beta_2=0.999)
         gen_optimizer = keras.optimizers.Adam(learning_rate=2e-4, beta_1=0.6, beta_2=0.999)
 
         discrim_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
@@ -61,9 +61,9 @@ class Pix2Pix ():
         # Discriminators determines validity of translated images / condition pairs
         valid = self.discriminator([img_A, fake_B])
 
-        self.combined = keras.Model(inputs=[img_A, img_B], outputs=[valid])
-        self.combined.compile(loss=[gen_loss],
-                              loss_weights=[1],
+        self.combined = keras.Model(inputs=[img_A, img_B], outputs=[valid, img_B])
+        self.combined.compile(loss=[gen_loss, "MAE"],
+                              loss_weights=[1, 100],
                               optimizer=gen_optimizer)
 
     def buildGenerator (self):
