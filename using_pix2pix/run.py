@@ -9,15 +9,15 @@ from data import Data
 data = Data()
 pix2pix = Pix2Pix()
 
-batch_size = 4
+batch_size = 16
 
 accuracy = 0
 ignore_runs = 0
 
 # Train the model
-for i in range(100000):
+for i in range(1000000):
 
-    if i % 3 == 0:
+    if i % 20 == 0:
 
         rrpl, arial = data.getCharPair("龍")
         predicted = pix2pix.generator.predict(np.expand_dims(rrpl, 0))
@@ -51,6 +51,8 @@ for i in range(100000):
             d_loss[0], accuracy,
             g_loss[0]))
 
-    if i % 100 == 0:
+    if i % 50 == 0:
         print("SAVING...")
-        pix2pix.generator.save("saves/save.h5")
+        pix2pix.generator.save("saves/save_large.generator.h5")
+        pix2pix.combined.save("saves/save_large.combined.h5")
+        pix2pix.discriminator.save("saves/save_large.discriminator.h5")
