@@ -2,21 +2,31 @@
 
 import tensorflow as tf
 from tensorflow import keras
+import keras_tuner as kt
 
 class Pix2Pix ():
 
-    def __init__ (self):
+    def __init__ (self, hyperparam):
 
         def wasserstein_loss(y_true, y_pred):
             return keras.backend.mean(y_true * y_pred)
+
+        # Define hyperparams
+        initial_lr_gen = hp.Float("lr_gen", min_value=1e-16, max_value=1e-3, step=64)
+        initial_lr_discrim = hp.Float("lr_discrim", min_value=1e-16, max_value=1e-3, step=64)
+        beta1_gen = hp.Float("beta1_gen", min_value=0, max_value=1, step=10)
+        beta1_discrim = hp.Float("beta1_discrim", min_value=0, max_value=1, step=10)
+        beta2_gen = hp.Float("beta1_gen", min_value=0, max_value=1, step=10)
+        beta2_discrim = hp.Float("beta1_gen", min_value=0, max_value=1, step=10)
+        mae_weight = hp.Float("mae_weight", min_value=0.1, max_value=100, step=64)
 
         self.image_rows = 128
         self.image_columns = 128
         self.channels = 1
 
         # Number of filters in the first layer of G and D
-        self.gf = 72
-        self.df = 72
+        self.gf = 24
+        self.df = 24
 
         self.gbn = True
         self.dbn = True
@@ -28,11 +38,11 @@ class Pix2Pix ():
         #self.disc_patch = (patch, patch, 1)
 
         # Previously: 10x smaller for both
-        lr_discrim = keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=6e-5, decay_steps=10000, decay_rate=0.99)
-        lr_gen = keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=5e-5, decay_steps=10000, decay_rate=0.99)
+        lr_discrim = keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=initial_lr_gen, decay_steps=10000, decay_rate=0.99)
+        lr_gen = keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=initial_lr_discrim, decay_steps=10000, decay_rate=0.99)
 
-        discrim_optimizer = keras.optimizers.Adam(learning_rate=lr_discrim, beta_1=0.6, beta_2=0.99)
-        gen_optimizer = keras.optimizers.Adam(learning_rate=lr_gen, beta_1=0.6, beta_2=0.99)
+        discrim_optimizer = keras.optimizers.Adam(learning_rate=lr_discrim, beta_1=beta1_gen, beta_2=beta2_gen)
+        gen_optimizer = keras.optimizers.Adam(learning_rate=lr_gen, beta_1=beta1_discrim, beta_2=beta2_discrim)
 
         discrim_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
         gen_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
@@ -67,7 +77,7 @@ class Pix2Pix ():
 
         self.combined = keras.Model(inputs=[img_A, img_B], outputs=[valid, img_B])
         self.combined.compile(loss=[gen_loss, "MAE"],
-                              loss_weights=[1, 10],
+                              loss_weights=[1, mae_weight],
                               optimizer=gen_optimizer)
 
     def buildGenerator (self):
